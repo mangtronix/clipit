@@ -50,7 +50,7 @@ vqgan_config_table = {
     "coco": 'https://dl.nmkd.de/ai/clip/coco/coco.yaml',
     "faceshq": 'https://drive.google.com/uc?export=download&id=1fHwGx_hnBtC8nsq7hesJvs-Klv-P0gzT',
     "wikiart_1024": 'http://mirror.io.community/blob/vqgan/wikiart.yaml',
-    "wikiart_16384": 'http://mirror.io.community/blob/vqgan/wikiart_16384.yaml',
+    "wikiart_16384": 'http://eaidata.bmk.sh/data/Wikiart_16384/wikiart_f16_16384_8145600.yaml',
     "sflckr": 'https://heibox.uni-heidelberg.de/d/73487ab6e5314cb5adba/files/?p=%2Fconfigs%2F2020-11-09T13-31-51-project.yaml&dl=1',
 }
 vqgan_checkpoint_table = {
@@ -60,7 +60,7 @@ vqgan_checkpoint_table = {
     "coco": 'https://dl.nmkd.de/ai/clip/coco/coco.ckpt',
     "faceshq": 'https://app.koofr.net/content/links/a04deec9-0c59-4673-8b37-3d696fe63a5d/files/get/last.ckpt?path=%2F2020-11-13T21-41-45_faceshq_transformer%2Fcheckpoints%2Flast.ckpt',
     "wikiart_1024": 'http://mirror.io.community/blob/vqgan/wikiart.ckpt',
-    "wikiart_16384": 'http://mirror.io.community/blob/vqgan/wikiart_16384.ckpt',
+    "wikiart_16384": 'http://eaidata.bmk.sh/data/Wikiart_16384/wikiart_f16_16384_8145600.ckpt',
     "sflckr": 'https://heibox.uni-heidelberg.de/d/73487ab6e5314cb5adba/files/?p=%2Fcheckpoints%2Flast.ckpt&dl=1'
 }
 
@@ -159,7 +159,7 @@ def gradient_3d(width, height, start_list, stop_list, is_horizontal_list):
 
     return result
 
-    
+
 def random_gradient_image(w,h):
     array = gradient_3d(w, h, (0, 0, np.random.randint(0,255)), (np.random.randint(1,255), np.random.randint(2,255), np.random.randint(3,128)), (True, False, False))
     random_image = Image.fromarray(np.uint8(array))
@@ -321,7 +321,7 @@ class MakeCutouts(nn.Module):
         #     # K.RandomSharpness(0.3,p=0.4),
         #     # K.RandomResizedCrop(size=(self.cut_size,self.cut_size), scale=(0.1,1),  ratio=(0.75,1.333), cropping_mode='resample', p=0.5, return_transform=True),
         #     K.RandomCrop(size=(self.cut_size,self.cut_size), p=1.0),
-            
+
         #     # K.RandomAffine(degrees=15, translate=0.1, p=0.7, padding_mode='border', return_transform=True),
 
         #     # MyRandomPerspective(distortion_scale=0.40, p=0.7, return_transform=True),
@@ -330,9 +330,9 @@ class MakeCutouts(nn.Module):
 
         #     # K.RandomErasing((.1, .4), (.3, 1/.3), same_on_batch=True, p=0.7, return_transform=True),
         #     )
-            
+
         self.noise_fac = 0.1
-        
+
         # Pooling
         self.av_pool = nn.AdaptiveAvgPool2d((self.cut_size, self.cut_size))
         self.max_pool = nn.AdaptiveMaxPool2d((self.cut_size, self.cut_size))
@@ -360,7 +360,7 @@ class MakeCutouts(nn.Module):
             # cutout = input[:, :, offsety:offsety + size, offsetx:offsetx + size]
             # cutouts.append(resample(cutout, (self.cut_size, self.cut_size)))
             # cutout = transforms.Resize(size=(self.cut_size, self.cut_size))(input)
-            
+
             # Pooling
             cutout = (self.av_pool(input) + self.max_pool(input))/2
 
@@ -395,7 +395,7 @@ class MakeCutouts(nn.Module):
             #         TF.to_pil_image(batch[j].cpu()).save(f"live_im_{i:02d}_{j:02d}_{spot}.png")
 
         # print(batch.shape, self.transforms.shape)
-        
+
         if self.noise_fac:
             facs = batch.new_empty([self.cutn, 1, 1, 1]).uniform_(0, self.noise_fac)
             batch = batch + facs * torch.randn_like(batch)
@@ -469,7 +469,7 @@ def do_init(args):
         # TODO: is one cut_size enought? I hope so.
         cut_size = perceptor.visual.input_resolution
         cutoutSizeTable[clip_model] = cut_size
-        if not cut_size in cutoutsTable:    
+        if not cut_size in cutoutsTable:
             make_cutouts = MakeCutouts(cut_size, args.num_cuts, cut_pow=args.cut_pow)
             cutoutsTable[cut_size] = make_cutouts
 
@@ -727,8 +727,8 @@ cutoutsTable = {}
 cutoutSizeTable = {}
 init_image_tensor = None
 pmsTable = None
-spotPmsTable = None 
-spotOffPmsTable = None 
+spotPmsTable = None
+spotOffPmsTable = None
 pImages = None
 gside_X=None
 gside_Y=None
@@ -878,7 +878,7 @@ def ascend_txt(args):
         cur_loss = F.cosine_embedding_loss(f, f2, y) * args.init_weight_cos
         result.append(cur_loss)
 
-    if args.make_video:    
+    if args.make_video:
         img = np.array(out.mul(255).clamp(0, 255)[0].cpu().detach().numpy().astype(np.uint8))[:,:,:]
         img = np.transpose(img, (1, 2, 0))
         imageio.imwrite(f'./steps/frame_{i:04d}.png', np.array(img))
@@ -910,7 +910,7 @@ def train(args, i):
     global z, z_min, z_max
     opt.zero_grad(set_to_none=True)
     lossAll = ascend_txt(args)
-    
+
     if i % args.display_freq == 0:
         checkin(args, i, lossAll)
 
@@ -921,7 +921,7 @@ def train(args, i):
     if args.overlay_every and i != 0 and \
         (i % (args.overlay_every + args.overlay_offset)) == 0:
         re_average_z(args)
-    
+
     with torch.no_grad():
         z.copy_(z.maximum(z_min).minimum(z_max))
 
@@ -1028,7 +1028,7 @@ def setup_parser():
     vq_parser.add_argument("-asp",  "--aspect", type=str, help="widescreen, square", default="widescreen", dest='aspect')
     vq_parser.add_argument("-ezs",  "--ezsize", type=str, help="small, medium, large", default=None, dest='ezsize')
     vq_parser.add_argument("-sca",  "--scale", type=float, help="scale (instead of ezsize)", default=None, dest='scale')
-    vq_parser.add_argument("-ova",  "--overlay_alpha", type=int, help="Overlay alpha (0-255)", default=None, dest='overlay_alpha')    
+    vq_parser.add_argument("-ova",  "--overlay_alpha", type=int, help="Overlay alpha (0-255)", default=None, dest='overlay_alpha')
     vq_parser.add_argument("-s",    "--size", nargs=2, type=int, help="Image size (width height)", default=None, dest='size')
     vq_parser.add_argument("-ii",   "--init_image", type=str, help="Initial image", default=None, dest='init_image')
     vq_parser.add_argument("-iia",  "--init_image_alpha", type=int, help="Init image alpha (0-255)", default=200, dest='init_image_alpha')
@@ -1054,7 +1054,7 @@ def setup_parser():
     vq_parser.add_argument("-vid",  "--video", type=bool, help="Create video frames?", default=False, dest='make_video')
     vq_parser.add_argument("-d",    "--deterministic", type=bool, help="Enable cudnn.deterministic?", default=False, dest='cudnn_determinism')
 
-    return vq_parser    
+    return vq_parser
 
 square_size = [144, 144]
 widescreen_size = [200, 112]  # at the small size this becomes 192,112
@@ -1220,7 +1220,7 @@ def apply_settings():
     return settings
 
 def main():
-    settings = apply_settings()    
+    settings = apply_settings()
     do_init(settings)
     do_run(settings)
 
